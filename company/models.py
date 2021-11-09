@@ -8,6 +8,12 @@ class Company(db.Model):
     column = ["id", "name"]
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(32), nullable=False, unique=True)
+    tag = db.relationship(
+        "Tag",
+        secondary="company_tags",
+        lazy="subquery",
+        backref=db.backref("companies", lazy=True),
+    )
 
 
 company_countries = db.Table(
@@ -26,7 +32,13 @@ class Country(db.Model):
     name = db.Column(db.String(32), nullable=False, unique=True)
     company = db.relationship(
         "Company",
-        secondary="companies",
+        secondary="company_countries",
+        lazy="subquery",
+        backref=db.backref("countries", lazy=True),
+    )
+    tag = db.relationship(
+        "Tag",
+        secondary="country_tags",
         lazy="subquery",
         backref=db.backref("countries", lazy=True),
     )
