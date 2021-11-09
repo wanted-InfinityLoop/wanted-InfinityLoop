@@ -23,4 +23,7 @@ class CompanyList(Resource):
             if company_name in company.translated_name
         ]
 
+        if len(result) == 0 :
+            return {"message": "COMPANY NOT FOUND"}, 404
+
         return result, 200
