@@ -3,7 +3,7 @@ from flask_restful import Api
 from flask_migrate import Migrate
 
 from company.models     import db
-from company.controller import CompanyList, GetDetailCompany, CompanyCreateView
+from company.controller import CompanyList, CompanyCreateView, CompanyDetail
 from config             import DB_URL
 
 
@@ -22,8 +22,8 @@ migrate = Migrate(app, db)
 
 
 api.add_resource(CompanyList, "/search")
-api.add_resource(GetDetailCompany, "/companies/<comp_name>")
 api.add_resource(CompanyCreateView, '/companies')
+api.add_resource(CompanyDetail, "/companies/<comp_name>")
 
 
 if __name__ == "__main__":
