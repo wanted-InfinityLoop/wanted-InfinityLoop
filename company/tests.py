@@ -29,7 +29,7 @@ def test_company_search(api):
     header의 x-wanted-language 언어값에 따라 해당 언어로 출력되어야 합니다.
     """
     resp = api.get(
-        "/companies/원티드랩", headers=[("x-wanted-language", "kr")]
+        "/companies/원티드랩", headers=[("x-wanted-language", "ko")]
     )
 
     company = json.loads(resp.data.decode("utf-8"))
@@ -68,21 +68,21 @@ def test_new_company(api):
             "tags": [
                 {
                     "tag_name": {
-                        "ko": "태그_1",
+                        "ko": "연봉업계평균이상",
                         "tw": "tag_1",
                         "en": "tag_1",
                     }
                 },
                 {
                     "tag_name": {
-                        "ko": "태그_8",
+                        "ko": "퇴사율5%이하",
                         "tw": "tag_8",
                         "en": "tag_8",
                     }
                 },
                 {
                     "tag_name": {
-                        "ko": "태그_15",
+                        "ko": "설립10년이상",
                         "tw": "tag_15",
                         "en": "tag_15",
                     }
