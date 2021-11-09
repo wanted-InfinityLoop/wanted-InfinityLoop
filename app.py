@@ -1,8 +1,9 @@
 from flask import Flask
-from flask_restful import Resource, Api
+from flask_restful import Api
 from flask_migrate import Migrate
 
 from company.models import db
+from company.controller import CompanyList
 from config import DB_URL
 
 app = Flask(__name__)
@@ -18,9 +19,7 @@ db.create_all()
 migrate = Migrate(app, db)
 
 
-@app.route("/ping", methods=["GET"])
-def ping():
-    return "pong"
+api.add_resource(CompanyList, "/search")
 
 
 if __name__ == "__main__":
