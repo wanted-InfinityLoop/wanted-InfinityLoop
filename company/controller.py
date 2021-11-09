@@ -73,64 +73,69 @@ class GetDetailCompany(Resource):
 
 class CompanyCreateView(Resource):
     def post(self):
-        try:
-            tag_list      = []
-            params        = request.get_json()
-            country_code  = request.headers.get("x-wanted-language")
-            company_infor = list(params["company_name"].items())
-            
-            if not db.session.query(db.session.query(Company).filter_by(name=company_infor[0][1]).exists()).scalar():
-                company_entity = Company(name=company_infor[0][1])
-                db.session.add(company_entity)
+        tag_list      = []
+        params        = request.get_json()
+        country_code  = request.headers.get("x-wanted-language")
+        company_infor = list(params["company_name"].items())
+        
+        if not db.session.query(db.session.query(Company).filter_by(name=company_infor[0][1]).exists()).scalar():
+            company_entity = Company(name=company_infor[0][1])
+            db.session.add(company_entity)
+            db.session.commit()
+        else:
+            company_entity = Company.query.filter_by(name=company_infor[0][1]).first()
+
+        for language, translated_company in company_infor:
+            if not db.session.query(db.session.query(Country).filter_by(name=language).exists()).scalar():
+                country = Country(name=language)
+                db.session.add(country)
                 db.session.commit()
             else:
-                company_entity = Company.query.filter_by(name=company_infor[0][1]).first()
+                country = Country.query.filter_by(name=language).first()
 
-            for language, translated_company in company_infor:
-                if not db.session.query(db.session.query(Country).filter_by(name=language).exists()).scalar():
-                    country = Country(name=language)
-                    db.session.add(country)
-                    db.session.commit()
-                else:
-                    country = Country.query.filter_by(name=language).first()
+            com_country = company_countries.insert().values(
+                country_id=country.id,
+                company_id=company_entity.id, 
+                translated_name=translated_company 
+            )
+            db.session.execute(com_country)
+            db.session.commit()
+        
+        for tag in params["tags"]:
+            tag_infor  = list(tag['tag_name'].items())
 
-                com_country = company_countries.insert().values(
-                    country_id=country.id,
-                    company_id=company_entity.id, 
-                    translated_name=translated_company 
-                )
-                db.session.execute(com_country)
-                db.session.commit()
-            
-            for tag in params["tags"]:
-                tag_infor  = list(tag['tag_name'].items())
+            if not db.session.query(db.session.query(Tag).filter_by(name=tag_infor[0][1]).exists()).scalar():
                 tag_entity = Tag(name=tag_infor[0][1])
                 db.session.add(tag_entity)
                 db.session.commit()
-                
-                for key, value in tag_infor:
-                    if key == country_code:
-                        tag_list.append(value)
-
-                    country     = Country.query.filter_by(name=key).first()
-                    country_tag = country_tags.insert().values(
-                        country_id=country.id,
-                        tag_id=tag_entity.id,
-                        translated_tag=value
-                    )
-                    db.session.execute(country_tag)
-                    db.session.commit()
-        
-                com_tag = company_tags.insert().values(
-                    company_id=company_entity.id, 
-                    tag_id= tag_entity.id
-                    )
-                db.session.execute(com_tag)
-                db.session.commit()
+            else:
+                return({"message":"duplicate data"}, 409)
             
-            company_name = params["company_name"][country_code]
-            tags         = tag_list
-            return({"company_name": company_name, "tags":tags}, 200)
+            tag_entity = Tag.query.filter_by(name=tag_infor[0][1]).first()
+
+            for key, value in tag_infor:
+                if not Tag.query.filter_by(name=key):
+                    pass
+                if key == country_code:
+                    tag_list.append(value)
+
+                country     = Country.query.filter_by(name=key).first()
+                country_tag = country_tags.insert().values(
+                    country_id=country.id,
+                    tag_id=tag_entity.id,
+                    translated_tag=value
+                )
+                db.session.execute(country_tag)
+                db.session.commit()
+    
+            com_tag = company_tags.insert().values(
+                company_id=company_entity.id, 
+                tag_id= tag_entity.id
+                )
+            db.session.execute(com_tag)
+            db.session.commit()
         
-        except:
-            return({"message":"duplicate data"}, 409)
+        company_name = params["company_name"][country_code]
+        tags         = tag_list
+        return({"company_name": company_name, "tags":tags}, 200)
+    
