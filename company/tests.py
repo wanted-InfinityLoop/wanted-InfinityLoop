@@ -29,15 +29,17 @@ def test_company_search(api):
     header의 x-wanted-language 언어값에 따라 해당 언어로 출력되어야 합니다.
     """
     resp = api.get(
-        "/companies/원티드", headers=[("x-wanted-language", "ko")]
+        "/companies/원티드랩", headers=[("x-wanted-language", "kr")]
     )
 
     company = json.loads(resp.data.decode("utf-8"))
     assert resp.status_code == 200
     assert company == {
-        "company_name": "원티드",
+        "company_name": "원티드랩",
         "tags": [
-            "워라밸",
+            "태그_4",
+            "태그_20",
+            "태그_16",
         ],
     }
 
