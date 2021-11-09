@@ -47,15 +47,22 @@ class GetDetailCompany(Resource):
         company_country = db.session.query(company_countries).filter_by(
             company_id = company.id, 
             country_id = country.id
-            ).first().translated_name
+            ).first()
         
+        if not company_country:
+            return make_response(
+                jsonify(
+                    {"message" : "Company Does Not Exist"}
+                ), 404
+            )
+
         company_tag_set  = db.session.query(company_tags).filter_by(company_id=company.id)
         country_tag_list = [db.session.query(country_tags).filter_by(country_id = country.id, tag_id=t.tag_id).first().translated_tag for t in company_tag_set]
 
         return make_response(
             jsonify(
                 {
-                    "company_name" : company_country,
+                    "company_name" : company_country.translated_name,
                     "tags" : [
                         tag
                     for tag in country_tag_list]
